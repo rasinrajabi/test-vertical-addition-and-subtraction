@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<title>Столбик · Тест на 5 примеров</title>
+<style>
+    /* ===== ШРИФТ ПРОПИСИ (только для цифр в столбике) ===== */
+    @font-face {
+        font-family: 'Propisi';
+        src: local('Propisi'),
+             url('ofont.ru_Propisi.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+        margin: 0; padding: 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
+        color: #4a3d8d;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(255, 220, 240, 0.65) 0%, transparent 45%),
+            radial-gradient(circle at 85% 80%, rgba(200, 230, 255, 0.6) 0%, transparent 50%),
+            radial-gradient(circle at 70% 15%, rgba(220, 240, 255, 0.5) 0%, transparent 40%),
+            linear-gradient(160deg, #f5f0ff 0%, #ffe8f5 40%, #e0f8ff 100%);
+        background-attachment: fixed;
+    }
+
+    /* ===== ЭКРАНЫ ===== */
+    .screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+        overflow-y: auto;
+    }
+    .screen.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* ===== СТАРТОВЫЙ ЭКРАН ===== */
+    .start-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 32px;
+        padding: 50px 60px;
+        text-align: center;
+        box-shadow:
+            0 20px 60px rgba(124, 92, 191, 0.18),
+            0 4px 12px rgba(124, 92, 191, 0.08),
+            inset 0 1px 2px rgba(255, 255, 255, 0.9);
+        border: 1.5px solid rgba(212, 197, 232, 0.6);
+        max-width: 480px;
+        width: 100%;
+    }
+    .start-card h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin: 0 0 12px;
+        background: linear-gradient(135deg, #7c5cbf, #e77fa6, #4a9db8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 2px;
+    }
+    .start-card .subtitle {
+        font-size: 1.1rem;
+        color: #8a7ab0;
+        margin-bottom: 32px;
+        letter-spacing: 0.5px;
+    }
+    .start-btn {
+        background: linear-gradient(135deg, #a98cf0, #7c5cbf);
+        color: #fff;
+        border: none;
+        padding: 16px 50px;
+        border-radius: 60px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        cursor: pointer;
+        letter-spacing: 1px;
+        box-shadow:
+            0 12px 28px rgba(124, 92, 191, 0.4),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        transition: 0.25s ease;
+    }
+    .start-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 36px rgba(124, 92, 191, 0.5);
+    }
+    .start-btn:active { transform: translateY(0) scale(0.97); }
+
+    /* ===== ЭКРАН ТЕСТА ===== */
+    .test-card {
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 32px;
+        padding: 28px 26px 32px;
+        box-shadow:
+            0 20px 60px rgba(124, 92, 191, 0.16),
+            0 4px 12px rgba(124, 92, 191, 0.06);
+        border: 1.5px solid rgba(212, 197, 232, 0.55);
+        max-width: 560px;
+        width: 100%;
+    }
+    .test-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        padding-bottom: 16px;
+        border-bottom: 1.5px solid rgba(212, 197, 232, 0.5);
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .timer-box, .progress-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+    .timer-label, .progress-label {
+        font-size: 0.72rem;
+        color: #a89bce;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    .timer-value {
+        font-size: 2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #7c5cbf, #4a9db8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
+        font-variant-numeric: tabular-nums;
+    }
+    .progress-value {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #7c5cbf;
+        letter-spacing: 1px;
+    }
+
+    .grid-container {
+        display: flex;
+        justify-content: center;
+        margin: 8px 0 20px;
+        overflow-x: auto;
+        animation: fadeSlide 0.4s ease;
+    }
+    @keyframes fadeSlide {
+        0% { opacity: 0; transform: translateY(12px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- ТАБЛИЦА — цифры в стиле Propisi ---- */
+    .grid-table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-family: 'Propisi', 'Courier New', monospace;
+        font-size: 1.9rem;
+        font-weight: 700;
+        text-align: center;
+        background: #ffffff;
+        box-shadow: 0 10px 28px rgba(124, 92, 191, 0.14);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .grid-table td {
+        border: 1.5px solid #d4c5e8;
+        padding: 0;
+        width: 62px;
+        height: 62px;
+        background: #ffffff;
+        color: #4a3d8d;
+        vertical-align: middle;
+    }
+    .sign-cell {
+        border: none !important;
+        background: transparent !important;
+        font-size: 2.6rem;
+        font-weight: 700;
+        color: #7c5cbf;
+        padding: 0 !important;
+        width: 62px;
+        vertical-align: middle !important;
+        line-height: 1.2;
+        height: 62px;
+    }
+    .memory-cell {
+        background: #faf6ff;
+        padding: 0;
+        height: 62px;
+        border-color: #e8defa !important;
+    }
+    .memory-cell input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 1.05rem;
+        font-weight: 700;
+        font-family: 'Propisi', 'Courier New', monospace;
+        color: #a89bce;
+        outline: none;
+        padding: 0;
+    }
+    .memory-cell input:focus {
+        background: #f0e8ff;
+        color: #7c5cbf;
+        box-shadow: inset 0 0 0 2px #c8b6e8;
+    }
+    .memory-cell input[data-length="2"] { font-size: 0.78rem; }
+
+    .digit-cell {
+        background: #ffffff;
+        font-weight: 700;
+        height: 62px;
+        font-size: 2.8rem;
+        line-height: 1.2;
+        color: #4a3d8d;
+    }
+    .line-row td {
+        border-top: 3px solid #b89bff !important;
+        border-bottom: none !important;
+        background: transparent;
+        height: 4px;
+        padding: 0;
+    }
+    .answer-input-cell {
+        background: #f8f3ff;
+        padding: 0;
+        height: 62px;
+        border-color: #d4c5e8 !important;
+    }
+    .answer-input-cell input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 2.4rem;
+        font-weight: 700;
+        font-family: 'Propisi', 'Courier New', monospace;
+        color: #4a3d8d;
+        outline: none;
+        padding: 0;
+    }
+    .answer-input-cell input:focus {
+        background: #ede2ff;
+        box-shadow: inset 0 0 0 2px #a98cf0;
+    }
+    .answer-input-cell input.correct-cell {
+        animation: popGreen 0.5s ease;
+        background: #e0f8e8;
+    }
+    .answer-input-cell input.wrong-cell {
+        animation: shake 0.5s ease;
+        background: #fde5e5;
+    }
+    @keyframes popGreen {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.12); background: #c8f0d4; }
+        100% { transform: scale(1); background: #e0f8e8; }
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+
+    .check-btn {
+        background: linear-gradient(135deg, #a98cf0, #7c5cbf);
+        color: #fff;
+        border: none;
+        padding: 16px 30px;
+        border-radius: 60px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.25s ease;
+        letter-spacing: 0.5px;
+        box-shadow:
+            0 10px 24px rgba(124, 92, 191, 0.35),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.08),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+    .check-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(124, 92, 191, 0.45);
+    }
+    .check-btn:active:not(:disabled) { transform: scale(0.97); }
+    .check-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .feedback-area {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 1.15rem;
+        font-weight: 700;
+        min-height: 1.5em;
+        letter-spacing: 0.5px;
+    }
+    .feedback-area.ok { color: #2e8a4a; }
+    .feedback-area.no { color: #d04040; }
+    .feedback-area.hint { color: #a89bce; font-size: 0.95rem; }
+
+    /* ===== ЭКРАН РЕЗУЛЬТАТОВ ===== */
+    .results-card {
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 32px;
+        padding: 36px 34px 32px;
+        box-shadow:
+            0 20px 60px rgba(124, 92, 191, 0.18),
+            0 4px 12px rgba(124, 92, 191, 0.06);
+        border: 1.5px solid rgba(212, 197, 232, 0.55);
+        max-width: 580px;
+        width: 100%;
+        max-height: 94vh;
+        overflow-y: auto;
+    }
+    .results-card h1 {
+        font-size: 2.2rem;
+        font-weight: 900;
+        margin: 0 0 24px;
+        text-align: center;
+        background: linear-gradient(135deg, #7c5cbf, #e77fa6, #4a9db8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1.5px;
+    }
+    .name-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding: 14px 18px;
+        background: linear-gradient(135deg, #faf6ff 0%, #f0e8ff 100%);
+        border-radius: 16px;
+        border: 1.5px solid #e0d4f5;
+    }
+    .name-box label {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #7c5cbf;
+        white-space: nowrap;
+        letter-spacing: 0.5px;
+    }
+    .name-input {
+        flex: 1;
+        border: none;
+        background: #ffffff;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        color: #4a3d8d;
+        outline: none;
+        border: 1.5px solid #e0d4f5;
+        transition: 0.2s;
+    }
+    .name-input:focus {
+        border-color: #a98cf0;
+        box-shadow: 0 0 0 3px rgba(169, 140, 240, 0.18);
+    }
+    .name-input::placeholder {
+        color: #b8aed4;
+        font-weight: 400;
+    }
+
+    .result-summary {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+    .result-stat {
+        flex: 1;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f3ff 100%);
+        border-radius: 18px;
+        padding: 18px 14px;
+        text-align: center;
+        border: 1.5px solid #e0d4f5;
+        box-shadow: 0 4px 12px rgba(124, 92, 191, 0.06);
+    }
+    .result-stat-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #7c5cbf;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+    }
+    .result-stat-label {
+        font-size: 0.78rem;
+        color: #a89bce;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .examples-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+    .example-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 18px;
+        background: #faf6ff;
+        border-radius: 14px;
+        border: 1.5px solid #ede4fb;
+        gap: 12px;
+    }
+    .example-row.correct {
+        background: linear-gradient(135deg, #f0fff5 0%, #e0f8e8 100%);
+        border-color: #b8e8c8;
+    }
+    .example-row.wrong {
+        background: linear-gradient(135deg, #fff5f5 0%, #fde5e5 100%);
+        border-color: #f0c0c0;
+    }
+    .example-expr {
+        font-family: 'Propisi', 'Courier New', monospace;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #4a3d8d;
+        letter-spacing: 1px;
+    }
+    .example-expr .num { padding: 0 2px; }
+    .example-expr .op { padding: 0 6px; color: #7c5cbf; }
+    .example-answer {
+        font-size: 1.15rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.5px;
+    }
+    .example-row.correct .example-answer { color: #2e8a4a; }
+    .example-row.wrong .example-answer { color: #d04040; }
+    .example-row .correct-answer {
+        font-size: 0.9rem;
+        color: #8a7ab0;
+        font-weight: 700;
+    }
+
+    .restart-btn {
+        background: linear-gradient(135deg, #a98cf0, #7c5cbf);
+        color: #fff;
+        border: none;
+        padding: 16px 30px;
+        border-radius: 60px;
+        font-weight: 700;
+        font-size: 1.15rem;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.25s ease;
+        letter-spacing: 1px;
+        box-shadow:
+            0 10px 24px rgba(124, 92, 191, 0.35),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.08),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+    .restart-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(124, 92, 191, 0.45);
+    }
+    .restart-btn:active { transform: scale(0.97); }
+
+    /* ===== ОВЕРЛЕЙ ОШИБКИ ===== */
+    .error-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        background: rgba(250, 240, 255, 0.75);
+        backdrop-filter: blur(8px);
+    }
+    .error-overlay.visible {
+        display: flex;
+        animation: overlayFade 0.35s ease;
+    }
+    @keyframes overlayFade {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    .error-card {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 3rem;
+        font-weight: 900;
+        padding: 40px 70px;
+        border-radius: 40px;
+        background: linear-gradient(145deg, #ffffff, #fff0f5);
+        color: #d04040;
+        text-align: center;
+        letter-spacing: 3px;
+        box-shadow:
+            0 30px 80px rgba(208, 64, 64, 0.25),
+            0 0 0 2px rgba(255, 255, 255, 0.9),
+            inset 0 -4px 8px rgba(208, 64, 64, 0.08);
+        border: 2px solid #f7c0c0;
+        animation: errorPop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+    .error-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        border-radius: 40px 40px 0 0;
+        background: linear-gradient(90deg, #f7c0c0, #e77a7a, #f7c0c0);
+    }
+    @keyframes errorPop {
+        0% { transform: scale(0.3) rotate(-6deg); opacity: 0; }
+        55% { transform: scale(1.08) rotate(1.5deg); }
+        75% { transform: scale(0.96) rotate(-0.5deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* ===== КОНФЕТТИ ===== */
+    .confetti-layer {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 2000;
+    }
+    .confetti-piece {
+        position: absolute;
+        top: -30px;
+        will-change: transform, opacity;
+        animation-name: confettiFall;
+        animation-timing-function: cubic-bezier(0.25, 0.6, 0.5, 1);
+        animation-fill-mode: forwards;
+    }
+    @keyframes confettiFall {
+        0% {
+            transform: translate3d(0, -10vh, 0) rotate(0deg) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate3d(var(--drift), 110vh, 0) rotate(var(--rot)) scale(0.9);
+            opacity: 0.85;
+        }
+    }
+    .confetti-burst {
+        position: absolute;
+        left: 50%;
+        top: 45%;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: burstOut 0.9s ease-out forwards;
+    }
+    @keyframes burstOut {
+        0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; }
+    }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 600px) {
+        .start-card { padding: 36px 28px; }
+        .start-card h1 { font-size: 2.2rem; }
+        .test-card { padding: 20px 16px 24px; }
+        .results-card { padding: 26px 20px 24px; }
+        .results-card h1 { font-size: 1.7rem; }
+        .grid-table td { width: 46px; height: 48px; font-size: 1.4rem; }
+        .sign-cell { font-size: 2rem; width: 46px; height: 48px; }
+        .memory-cell { height: 48px; }
+        .memory-cell input { font-size: 0.85rem; }
+        .memory-cell input[data-length="2"] { font-size: 0.64rem; }
+        .digit-cell { height: 48px; font-size: 1.9rem; }
+        .answer-input-cell { height: 48px; }
+        .answer-input-cell input { font-size: 1.75rem; }
+        .timer-value { font-size: 1.5rem; }
+        .progress-value { font-size: 1.3rem; }
+        .result-stat-value { font-size: 1.5rem; }
+        .error-card { font-size: 2rem; padding: 26px 34px; }
+        .name-box { flex-direction: column; align-items: stretch; gap: 8px; }
+    }
+</style>
+</head>
+<body>
+
+<!-- ===== СТАРТОВЫЙ ЭКРАН ===== -->
+<div class="screen screen-start active" id="screenStart">
+    <div class="start-card">
+        <h1>Столбик</h1>
+        <div class="subtitle">5 примеров · сложение и вычитание</div>
+        <button class="start-btn" id="startBtn">Начать</button>
+    </div>
+</div>
+
+<!-- ===== ЭКРАН ТЕСТА ===== -->
+<div class="screen screen-test" id="screenTest">
+    <div class="test-card">
+        <div class="test-top">
+            <div class="timer-box">
+                <span class="timer-label">Время</span>
+                <span class="timer-value" id="timerValue">00:00</span>
+            </div>
+            <div class="progress-box">
+                <span class="progress-label">Пример</span>
+                <span class="progress-value" id="progressValue">1 / 5</span>
+            </div>
+        </div>
+        <div class="grid-container" id="gridContainer"></div>
+        <button class="check-btn" id="checkBtn">Проверить</button>
+        <div class="feedback-area" id="feedbackArea"></div>
+    </div>
+</div>
+
+<!-- ===== ЭКРАН РЕЗУЛЬТАТОВ ===== -->
+<div class="screen screen-results" id="screenResults">
+    <div class="results-card">
+        <h1>Тест завершён!</h1>
+        <div class="name-box">
+            <label>Ваше имя:</label>
+            <input type="text" class="name-input" id="nameInput" placeholder="Введите имя" autocomplete="off">
+        </div>
+        <div class="result-summary">
+            <div class="result-stat">
+                <div class="result-stat-value" id="resultTime">00:00</div>
+                <div class="result-stat-label">Время</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="resultScore">0 / 5</div>
+                <div class="result-stat-label">Правильно</div>
+            </div>
+        </div>
+        <div class="examples-list" id="examplesList"></div>
+        <button class="restart-btn" id="restartBtn">Ещё раз</button>
+    </div>
+</div>
+
+<!-- ===== ОВЕРЛЕЙ ОШИБКИ ===== -->
+<div class="error-overlay" id="errorOverlay">
+    <div class="error-card">Неправильно</div>
+</div>
+
+<script>
+/* ============================================================
+   ГЕНЕРАЦИЯ ПРИМЕРОВ
+   ============================================================ */
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function hasDigit7(num) {
+    return String(num).indexOf('7') !== -1;
+}
+function digitsArray(num) {
+    return String(num).split('').map(Number);
+}
+function padArray(arr, length) {
+    const pad = [];
+    for (let i = 0; i < length - arr.length; i++) pad.push('');
+    return pad.concat(arr);
+}
+
+function generateAdd() {
+    let a, b, result, attempts = 0;
+    do {
+        a = randomInt(10, 99);
+        b = randomInt(10, 99);
+        attempts++;
+        if (hasDigit7(a) || hasDigit7(b)) continue;
+        result = a + b;
+        if (hasDigit7(result)) continue;
+        if (result > 198) continue;
+        const units = (a % 10) + (b % 10);
+        const tens = Math.floor(a / 10) + Math.floor(b / 10) + Math.floor(units / 10);
+        if (units >= 10 || tens >= 10) break;
+    } while (attempts < 5000);
+    return { a, b, result, op: '+' };
+}
+
+function generateSub() {
+    let a, b, result, attempts = 0;
+    do {
+        a = randomInt(10, 99);
+        b = randomInt(10, 99);
+        if (a < b) [a, b] = [b, a];
+        attempts++;
+        if (hasDigit7(a) || hasDigit7(b)) continue;
+        result = a - b;
+        if (hasDigit7(result)) continue;
+        if (result < 0) continue;
+        const aU = a % 10, bU = b % 10;
+        if (aU < bU) break;
+    } while (attempts < 5000);
+    return { a, b, result, op: '−' };
+}
+
+function generateMixedExamples(count) {
+    const examples = [];
+    let addCount = 0;
+    let subCount = 0;
+    for (let i = 0; i < count; i++) {
+        let useAdd;
+        if (addCount >= 3) useAdd = false;
+        else if (subCount >= 3) useAdd = true;
+        else useAdd = Math.random() > 0.5;
+
+        if (useAdd) { examples.push(generateAdd()); addCount++; }
+        else { examples.push(generateSub()); subCount++; }
+    }
+    // Перемешиваем
+    for (let i = examples.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [examples[i], examples[j]] = [examples[j], examples[i]];
+    }
+    return examples;
+}
+
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+const state = {
+    examples: [],
+    currentIdx: 0,
+    correctCount: 0,
+    userAnswers: [],
+    timerId: null,
+    startTime: 0,
+    elapsedMs: 0,
+    locked: false
+};
+
+/* ============================================================
+   НАВИГАЦИЯ ЭКРАНОВ
+   ============================================================ */
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + name).classList.add('active');
+}
+
+/* ============================================================
+   ТАЙМЕР
+   ============================================================ */
+function startTimer() {
+    state.startTime = Date.now();
+    state.elapsedMs = 0;
+    updateTimerDisplay();
+    state.timerId = setInterval(() => {
+        state.elapsedMs = Date.now() - state.startTime;
+        updateTimerDisplay();
+    }, 100);
+}
+function stopTimer() {
+    if (state.timerId) {
+        clearInterval(state.timerId);
+        state.timerId = null;
+    }
+    state.elapsedMs = Date.now() - state.startTime;
+    updateTimerDisplay();
+}
+function updateTimerDisplay() {
+    document.getElementById('timerValue').textContent = formatMs(state.elapsedMs);
+}
+function formatMs(ms) {
+    const total = Math.floor(ms / 1000);
+    const mm = String(Math.floor(total / 60)).padStart(2, '0');
+    const ss = String(total % 60).padStart(2, '0');
+    return mm + ':' + ss;
+}
+
+/* ============================================================
+   РЕНДЕР ПРИМЕРА
+   ============================================================ */
+function renderCurrentExample() {
+    const ex = state.examples[state.currentIdx];
+    const colCount = 3;
+    const sign = ex.op;
+
+    const aPad = padArray(digitsArray(ex.a), colCount);
+    const bPad = padArray(digitsArray(ex.b), colCount);
+
+    let html = '<table class="grid-table" cellspacing="0">';
+
+    // Строка памяти
+    html += '<tr>';
+    html += '<td class="sign-cell" style="border-bottom:none!important;"></td>';
+    for (let i = 0; i < colCount; i++) {
+        html += '<td class="memory-cell"><input type="text" class="memory-input" data-col="' + i + '" maxlength="2" inputmode="numeric"></td>';
+    }
+    html += '</tr>';
+
+    // Первое число
+    html += '<tr>';
+    html += '<td class="sign-cell" rowspan="2">' + sign + '</td>';
+    for (let i = 0; i < colCount; i++) {
+        html += '<td class="digit-cell">' + (aPad[i] || '') + '</td>';
+    }
+    html += '</tr>';
+
+    // Второе число
+    html += '<tr>';
+    for (let i = 0; i < colCount; i++) {
+        html += '<td class="digit-cell">' + (bPad[i] || '') + '</td>';
+    }
+    html += '</tr>';
+
+    // Линия
+    html += '<tr class="line-row">';
+    html += '<td style="border:none;background:transparent;"></td>';
+    html += '<td colspan="' + colCount + '" style="border-bottom:3px solid #b89bff;border-top:none;"></td>';
+    html += '</tr>';
+
+    // Ответ
+    html += '<tr>';
+    html += '<td class="sign-cell" style="border-bottom:none!important;background:#f8f3ff;"></td>';
+    for (let i = 0; i < colCount; i++) {
+        html += '<td class="answer-input-cell"><input type="text" class="answer-input" data-col="' + i + '" maxlength="1" inputmode="numeric"></td>';
+    }
+    html += '</tr>';
+    html += '</table>';
+
+    const container = document.getElementById('gridContainer');
+    container.innerHTML = html;
+    container.style.animation = 'none';
+    void container.offsetWidth;
+    container.style.animation = '';
+
+    attachInputHandlers();
+    updateProgress();
+    document.getElementById('feedbackArea').textContent = '';
+    document.getElementById('feedbackArea').className = 'feedback-area';
+    state.locked = false;
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('checkBtn').textContent = 'Проверить';
+
+    setTimeout(() => {
+        const first = document.querySelector('.answer-input');
+        if (first) first.focus();
+    }, 100);
+}
+
+function updateProgress() {
+    document.getElementById('progressValue').textContent =
+        (state.currentIdx + 1) + ' / ' + state.examples.length;
+}
+
+function attachInputHandlers() {
+    document.querySelectorAll('.memory-input').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 2) val = val.slice(0, 2);
+            e.target.value = val;
+            if (val.length === 2) inp.setAttribute('data-length', '2');
+            else inp.removeAttribute('data-length');
+        });
+    });
+
+    const answerInputs = document.querySelectorAll('.answer-input');
+    answerInputs.forEach((input, idx) => {
+        input.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 1) val = val[0];
+            e.target.value = val;
+            if (val && idx < answerInputs.length - 1) {
+                answerInputs[idx + 1].focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value === '' && idx > 0) {
+                answerInputs[idx - 1].focus();
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkCurrent();
+            }
+        });
+    });
+}
+
+/* ============================================================
+   ПОЛУЧЕНИЕ ВВЕДЁННОГО ОТВЕТА
+   ============================================================ */
+function getEnteredAnswer() {
+    const inputs = document.querySelectorAll('.answer-input');
+    let numStr = '';
+    let started = false;
+    for (let i = 0; i < inputs.length; i++) {
+        const val = inputs[i].value.trim();
+        if (val === '') {
+            if (started) {
+                return { valid: false, reason: 'Нельзя пропускать клетки' };
+            }
+            continue;
+        }
+        if (!/^\d$/.test(val)) {
+            return { valid: false, reason: 'Только цифры 0-9' };
+        }
+        started = true;
+        numStr += val;
+    }
+    if (numStr === '') return { valid: false, reason: 'Введите ответ' };
+    const number = parseInt(numStr, 10);
+    if (isNaN(number)) return { valid: false, reason: 'Введите цифры' };
+    return { valid: true, value: number };
+}
+
+/* ============================================================
+   ПРОВЕРКА ТЕКУЩЕГО ПРИМЕРА
+   ============================================================ */
+function checkCurrent() {
+    if (state.locked) return;
+    const ex = state.examples[state.currentIdx];
+    const entered = getEnteredAnswer();
+    const feedback = document.getElementById('feedbackArea');
+
+    if (!entered.valid) {
+        feedback.textContent = entered.reason;
+        feedback.className = 'feedback-area hint';
+        return;
+    }
+
+    const correct = entered.value === ex.result;
+    state.userAnswers.push({
+        a: ex.a, b: ex.b, op: ex.op, result: ex.result,
+        entered: entered.value, correct: correct
+    });
+    if (correct) state.correctCount++;
+
+    const resStr = String(ex.result);
+    const resPad = resStr.padStart(3, ' ').split('').map(c => c === ' ' ? '' : c);
+    const answerInputs = document.querySelectorAll('.answer-input');
+    answerInputs.forEach((inp, i) => {
+        const expected = resPad[i] || '';
+        const val = inp.value.trim();
+        inp.classList.remove('correct-cell', 'wrong-cell');
+        void inp.offsetWidth;
+        if (val === expected || (val === '' && expected === '')) {
+            inp.classList.add('correct-cell');
+        } else {
+            inp.classList.add('wrong-cell');
+        }
+        inp.disabled = true;
+    });
+    document.querySelectorAll('.memory-input').forEach(inp => inp.disabled = true);
+
+    state.locked = true;
+    document.getElementById('checkBtn').disabled = true;
+
+    if (correct) {
+        feedback.textContent = 'Правильно!';
+        feedback.className = 'feedback-area ok';
+        launchConfetti();
+        setTimeout(advanceToNext, 1400);
+    } else {
+        feedback.textContent = 'Неправильно';
+        feedback.className = 'feedback-area no';
+        showErrorOverlay();
+        setTimeout(advanceToNext, 1900);
+    }
+}
+
+function advanceToNext() {
+    hideErrorOverlay();
+    state.currentIdx++;
+    if (state.currentIdx >= state.examples.length) {
+        finishTest();
+    } else {
+        renderCurrentExample();
+    }
+}
+
+/* ============================================================
+   ЗАВЕРШЕНИЕ ТЕСТА
+   ============================================================ */
+function finishTest() {
+    stopTimer();
+    showScreen('Results');
+    document.getElementById('resultTime').textContent = formatMs(state.elapsedMs);
+    document.getElementById('resultScore').textContent =
+        state.correctCount + ' / ' + state.examples.length;
+
+    const list = document.getElementById('examplesList');
+    list.innerHTML = '';
+    state.userAnswers.forEach((ans) => {
+        const row = document.createElement('div');
+        row.className = 'example-row ' + (ans.correct ? 'correct' : 'wrong');
+        let answerHtml = ans.correct
+            ? '<span>' + ans.entered + '</span><span>✓</span>'
+            : '<span>' + ans.entered + '</span><span>✗</span>' +
+              '<span class="correct-answer">правильно: ' + ans.result + '</span>';
+        row.innerHTML =
+            '<div class="example-expr">' +
+                '<span class="num">' + ans.a + '</span>' +
+                '<span class="op">' + ans.op + '</span>' +
+                '<span class="num">' + ans.b + '</span>' +
+            '</div>' +
+            '<div class="example-answer">' + answerHtml + '</div>';
+        list.appendChild(row);
+    });
+
+    setTimeout(() => document.getElementById('nameInput').focus(), 200);
+}
+
+/* ============================================================
+   ОВЕРЛЕЙ ОШИБКИ
+   ============================================================ */
+function showErrorOverlay() {
+    document.getElementById('errorOverlay').classList.add('visible');
+}
+function hideErrorOverlay() {
+    document.getElementById('errorOverlay').classList.remove('visible');
+}
+
+/* ============================================================
+   КОНФЕТТИ
+   ============================================================ */
+function launchConfetti() {
+    const colors = [
+        '#a98cf0', '#e77fa6', '#4a9db8', '#7c5cbf',
+        '#c8b6e8', '#f5b8d8', '#8ecfe8', '#f0d59a',
+        '#FFC107', '#FF9800', '#4CAF50', '#2196F3'
+    ];
+    const layer = document.createElement('div');
+    layer.className = 'confetti-layer';
+    document.body.appendChild(layer);
+
+    for (let i = 0; i < 90; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        const w = 6 + Math.random() * 9;
+        const h = w * (0.35 + Math.random() * 1.1);
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.width = w + 'px';
+        piece.style.height = h + 'px';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = (Math.random() * 0.6) + 's';
+        piece.style.animationDuration = (2 + Math.random() * 1.6) + 's';
+        piece.style.setProperty('--drift', (Math.random() * 240 - 120) + 'px');
+        piece.style.setProperty('--rot', (Math.random() * 1080 - 540) + 'deg');
+        if (Math.random() > 0.6) piece.style.borderRadius = '50%';
+        layer.appendChild(piece);
+    }
+
+    for (let i = 0; i < 35; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'confetti-burst';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 90 + Math.random() * 250;
+        dot.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        dot.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+        dot.style.animationDelay = (Math.random() * 0.15) + 's';
+        const size = 6 + Math.random() * 10;
+        dot.style.width = size + 'px';
+        dot.style.height = size + 'px';
+        layer.appendChild(dot);
+    }
+    setTimeout(() => layer.remove(), 4200);
+}
+
+/* ============================================================
+   УПРАВЛЕНИЕ ТЕСТОМ
+   ============================================================ */
+function startTest() {
+    state.examples = generateMixedExamples(5);
+    state.currentIdx = 0;
+    state.correctCount = 0;
+    state.userAnswers = [];
+    state.elapsedMs = 0;
+    state.locked = false;
+    document.getElementById('nameInput').value = '';
+    showScreen('Test');
+    renderCurrentExample();
+    startTimer();
+}
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('startBtn').addEventListener('click', startTest);
+    document.getElementById('restartBtn').addEventListener('click', startTest);
+    document.getElementById('checkBtn').addEventListener('click', checkCurrent);
+});
+</script>
+</body>
+</html>
